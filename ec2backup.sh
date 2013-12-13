@@ -1,16 +1,7 @@
-#!/bin/bash  
+#!/bin/bash
 #
 # Author:	Bogdan Radulescu <bogdan@nimblex.net>
 
-
-# Set Environment Variables
-. ec2backup.conf
-
-# Sanity checks
-command -v java >/dev/null 2>&1		|| { echo >&2 "Java was not detected. Make sure you can run java in the command line."; exit 1; }
-command -v ec2dsnap >/dev/null 2>&1	|| { echo >&2 "EC2 Tools were not detected. Make sure you can run ec2dsnap in the command line."; exit 1; }
-
-# This function take the name of the volume as the single parameter
 
 Warning() {
   echo -e "\e[31m Warning: \e[39m$@"
@@ -20,6 +11,44 @@ Info() {
   echo -e "\e[32m Info: \e[39m$@"
 }
 
+
+while getopts ":c:" opt; do
+  case $opt in
+    c)
+      CONF=$OPTARG
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG"
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument."
+      exit 1
+      ;;
+  esac
+done
+
+if [[ $CONF ]]; then
+  Info "we'll use $CONF for settings"
+elif [[ -f ec2backup.conf ]]; then
+  CONF=ec2backup.conf
+elif [[ -f /etc/ec2backup.conf ]]; then
+  CONF=/etc/ec2backup.conf
+else
+  Warning "ec2backup.conf was not found in the $PWD directory or in /etc"
+  Info "You can copy the sample to /etc/ec2backup.conf and adjust it accordingly"
+  exit
+fi
+
+# Set Environment Variables
+. $CONF
+
+# Sanity checks
+command -v java >/dev/null 2>&1		|| { echo >&2 "Java was not detected. Make sure you can run java in the command line."; exit 1; }
+command -v ec2dsnap >/dev/null 2>&1	|| { echo >&2 "EC2 Tools were not detected. Make sure you can run ec2dsnap in the command line."; exit 1; }
+
+
+# This function take the name of the volume as the single parameter
 create_snapshot() {
   ec2addsnap -d "ec2backup-`date +%Y-%m-%d`" $1 | awk '{print "Snapshot " $2 " for volume " $3 " is " $4}'
 }
@@ -43,10 +72,10 @@ prune_snapshot() {
         snapshot_date_s=`date --date="$snapshot_date" +%s`
  
         if (( $snapshot_date_s <= $day_days_ago_s )); then
-                        Info Deleting snapshot $snapshot_name for volume $1
+                        Info "Deleting snapshot $snapshot_name for volume $1"
                         ec2-delete-snapshot $snapshot_name
-        else
-                        Info NOT deleting snapshot $snapshot_name for volume $1
+#        else
+#                        Info "NOT deleting snapshot $snapshot_name for volume $1"
         fi
   done < /tmp/ec2_snapshots.txt
 }
