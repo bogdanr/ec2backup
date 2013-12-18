@@ -2,6 +2,7 @@
 #
 # Author:	Bogdan Radulescu <bogdan@nimblex.net>
 
+START=`date +%s`
 
 Warning() {
   echo -e "\e[31m Warning: \e[39m$@"
@@ -99,11 +100,16 @@ echo ------------------------
 ec2dsnap | awk '/pending/'
 }
 
-Warning Volumes ${RVOL[@]} are not available anymore
+main() {
+  echo -e "________________________________________________\n`date`"
+  Warning Volumes ${RVOL[@]} are not available anymore
 
-for volume in ${VBKP[@]}; do
-  create_snapshot $volume
-  prune_snapshot  $volume $RETAIN 
-done
+  for volume in ${VBKP[@]}; do
+    create_snapshot $volume
+    prune_snapshot  $volume $RETAIN 
+  done
 
+  echo "Issued commands in $((`date +%s` - $START)) seconds"
+}
 
+main >> /var/log/ec2backup.log
