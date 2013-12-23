@@ -1,24 +1,17 @@
-# EC2 API Tools
-EC2_HOME=/mnt/data/ec2-api-tools-1.6.12.0 # replace with path where ec2 api tools are installed
-
-# EC2 Credentials
-AWS_ACCESS_KEY=AKIAJOGSDFGICTV3KTIA			# replace with your aws access key
-AWS_SECRET_KEY=4QPBQcKfsafasKT9v0/WexG/PGGafsafsaf2Vntg	# replace with your aws secret key
-# EC2_URL=ec2.us-east-1.amazonaws.com			# replace with your aws region endpoint
-
-
-export EC2_HOME AWS_ACCESS_KEY AWS_SECRET_KEY EC2_URL
-export PATH=$PATH:$EC2_HOME/bin
+# Access profile
+# At least a profile has to be in .aws/config and can then be specified here.
+PROFILE="bk-eu-west"
 
 # Volumes which will be backed up
-# Fist batch which is a pool of some kind
-VOLIDs=(vol-175a3b54 vol-e38d0c94 vol-2a19386a)
 
-# Second batch just for demonstrating how to keep things organized
-VOLIDs+=(vol-b846c5cf vol-98c2bbef vol-7320102b vol-8f6226cc)
+# The netop boffice machine
+VOLIDs=(vol-76e3c923)
 
-# And a third one that can be some other kind of volumes
-VOLIDs+=(vol-27991850 vol-71600106 vol-615e1222)
+# WebConnect beta
+VOLIDs+=(vol-6267bf37 vol-b1c0c0e4 vol-9fa400ca vol-17b01442 vol-b1c0c0e4 vol-e366beb6 vol-87c0c0d2)
+
+# WebConnect live
+VOLIDs+=(vol-e40daab1 vol-6851f73d vol-a203a5f7 vol-6ed5753b vol-0d0ea858 vol-bb01a7ee vol-2776d572 vol-2676d573 vol-0c52f859 vol-7c53f929)
 
 # Retaintion period in days.
 RETAIN=7
