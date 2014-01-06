@@ -4,13 +4,11 @@ PROFILE="bk-eu-west"
 
 # Volumes which will be backed up
 
-# The netop boffice machine
-VOLIDs=(vol-76e3c923)
 
-# WebConnect beta
-VOLIDs+=(vol-6267bf37 vol-b1c0c0e4 vol-9fa400ca vol-17b01442 vol-b1c0c0e4 vol-e366beb6 vol-87c0c0d2)
+# Fist batch which is a pool of servers of some kind
+VOLIDs=(vol-6267bf37 vol-b1c0c0e4 vol-9fa400ca vol-17b01442 vol-b1c0c0e4 vol-e366beb6 vol-87c0c0d2)
 
-# WebConnect live
+# Second batch just for demonstrating how to keep things organized
 VOLIDs+=(vol-e40daab1 vol-6851f73d vol-a203a5f7 vol-6ed5753b vol-0d0ea858 vol-bb01a7ee vol-2776d572 vol-2676d573 vol-0c52f859 vol-7c53f929)
 
 # Retaintion period in days.

@@ -103,7 +103,7 @@ aws --profile=$PROFILE ec2 describe-snapshots --output=text | awk '/pending/'
 
 main() {
   echo -e "________________________________________________\n`date`"
-  if [[ ${RVOL[@]} -gt 0 ]]; then
+  if [[ ${#RVOL[@]} -gt 0 ]]; then
     Warning Volumes ${RVOL[@]} are not available anymore
   fi
   for volume in ${VBKP[@]}; do
