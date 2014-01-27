@@ -69,7 +69,7 @@ prune_snapshot() {
   # Loop to remove any snapshots older than specified days
   while read line
   do
-        snapshot_name=`echo "$line" | awk '{print $2}'`
+        snapshot_name=`echo "$line" | awk '{print $5}'`
         snapshot_date=`echo "$line" | awk '{print $6}' | awk -F "T" '{printf "%s\n", $1}'`
         snapshot_date_s=`date --date="$snapshot_date" +%s`
  
