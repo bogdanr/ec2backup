@@ -45,8 +45,6 @@ fi
 . $CONF
 
 # Sanity checks
-# command -v java >/dev/null 2>&1		|| { echo >&2 "Java was not detected. Make sure you can run java in the command line."; exit 1; }
-# command -v ec2dsnap >/dev/null 2>&1	|| { echo >&2 "EC2 Tools were not detected. Make sure you can run ec2dsnap in the command line."; exit 1; }
 command -v aws >/dev/null 2>&1		|| { echo >&2 "AWS CLI Tools were not detected. Make sure you can run aws in the command line."; exit 1; }
 
 
@@ -69,8 +67,8 @@ prune_snapshot() {
   # Loop to remove any snapshots older than specified days
   while read line
   do
-        snapshot_name=`echo "$line" | awk '{print $5}'`
-        snapshot_date=`echo "$line" | awk '{print $6}' | awk -F "T" '{printf "%s\n", $1}'`
+        snapshot_name=`echo "$line" | awk '{print $6}'`
+        snapshot_date=`echo "$line" | awk '{print $7}' | awk -F "T" '{printf "%s\n", $1}'`
         snapshot_date_s=`date --date="$snapshot_date" +%s`
  
         if (( $snapshot_date_s <= $day_days_ago_s )); then
@@ -83,7 +81,7 @@ prune_snapshot() {
 }
 
 # Get a list of volumes that are available in EC2
-AVAILABLE_VOLs=(`aws --profile=$PROFILE ec2 describe-volumes --output=text | awk '/VOLUME/ {print $7}'`)
+AVAILABLE_VOLs=(`aws --profile=$PROFILE ec2 describe-volumes --output=text | awk '/VOLUME/ { for (i=1;i<=NF;i++) { if ($i~"vol-") {print $i} } }'`)
 
 # Here we only sanitize the volumes list keeping only volumes that are still available in EC2
 VBKP=($(comm -12 <(printf '%s\n' "${AVAILABLE_VOLs[@]}" | LC_ALL=C sort) <(printf '%s\n' "${VOLIDs[@]}" | LC_ALL=C sort)))
