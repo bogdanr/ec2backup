@@ -50,7 +50,7 @@ command -v aws >/dev/null 2>&1		|| { echo >&2 "AWS CLI Tools were not detected. 
 
 # This function take the name of the volume as the single parameter
 create_snapshot() {
-  aws --profile=$PROFILE ec2 create-snapshot --output=text --description="ec2backup-`date +%Y-%m-%d`" --volume-id $1 | awk '{print "Snapshot " $4 " for volume " $7 " is " $6}'
+  aws --profile=$PROFILE ec2 create-snapshot --output=text --description="ec2backup-`date +%Y-%m-%d`" --volume-id $1 | awk '{print "Snapshot " $5 " for volume " $8 " is " $7}'
 }
 
 # This function takes two parameters, volume ID and days of retention
@@ -80,6 +80,11 @@ prune_snapshot() {
   done < /tmp/ec2_snapshots.txt
 }
 
+Email() {
+  command -v smtp-cli >/dev/null 2>&1      || { echo >&2 "The smtp-cli tool was not detected. Maybe you can get it here http://www.logix.cz/michal/devel/smtp-cli/smtp-cli"; exit 1; }
+  smtp-cli --to=$MAIL_TO --from=$MAIL_FROM --user=$MAIL_USER --pass=$MAIL_PASS --server=$MAIL_SRV:25 --subject="ec2backup has something for you" --body-plain="$@"
+}
+
 # Get a list of volumes that are available in EC2
 AVAILABLE_VOLs=(`aws --profile=$PROFILE ec2 describe-volumes --output=text | awk '/VOLUME/ { for (i=1;i<=NF;i++) { if ($i~"vol-") {print $i} } }'`)
 
@@ -103,6 +108,7 @@ main() {
   echo -e "________________________________________________\n`date`"
   if [[ ${#RVOL[@]} -gt 0 ]]; then
     Warning Volumes ${RVOL[@]} are not available anymore
+    Email "Volumes ${RVOL[@]} are not available anymore"
   fi
   for volume in ${VBKP[@]}; do
     create_snapshot $volume

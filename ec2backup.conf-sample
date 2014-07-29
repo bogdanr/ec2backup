@@ -2,6 +2,13 @@
 # At least a profile has to be in .aws/config and can then be specified here.
 PROFILE="bk-eu-west"
 
+# E-Mail settings
+MAIL_SRV="email-smtp.eu-west-1.amazonaws.com"
+MAIL_USER="ABCDEFGHIJKLMNOPQRST"
+MAIL_PASS="KrrAWKgzgSwTwRGapdP7TTKrrAWKgzgSwTwRYsx7G4pQ"
+MAIL_TO="bogdan@nimblex.net"
+MAIL_FROM="backup@nimblex.net"
+
 # Volumes which will be backed up
 
 
