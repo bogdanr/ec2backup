@@ -53,6 +53,16 @@ create_snapshot() {
   aws --profile=$PROFILE ec2 create-snapshot --output=text --description="ec2backup-`date +%Y-%m-%d`" --volume-id $1 | awk '{print "Snapshot " $5 " for volume " $8 " is " $7}'
 }
 
+create_tags() {
+  TMPFILE="/tmp/$$.tmp"
+  aws --profile=$PROFILE ec2 describe-volumes --volume-ids $1 | jq -c '.Volumes[].Tags[]' | sed -e 's/{//' -e 's/}//' -e 's/:/=/g' >> $TMPFILE
+  if [ -f $TMPFILE ]; then
+      echo "Setting tags..."
+      aws ec2 create-tags --profile=$PROFILE --resources $2 --tags `cat $TMPFILE`
+      unlink $TMPFILE
+  fi
+}
+
 # This function takes two parameters, volume ID and days of retention
 prune_snapshot() {
   date_days_ago=`date +%Y-%m-%d --date "$2 days ago"`
@@ -70,13 +80,15 @@ prune_snapshot() {
         snapshot_name=`echo "$line" | awk '{print $6}'`
         snapshot_date=`echo "$line" | awk '{print $7}' | awk -F "T" '{printf "%s\n", $1}'`
         snapshot_date_s=`date --date="$snapshot_date" +%s`
+        volume_name=`echo "$line" | awk '{print $9}'`
+        
+        create_tags $volume_name $snapshot_name
  
         if (( $snapshot_date_s <= $day_days_ago_s )); then
                         Info "Deleting snapshot $snapshot_name for volume $1"
                         aws --profile=$PROFILE ec2 delete-snapshot --snapshot-id $snapshot_name
-#        else
-#                        Info "NOT deleting snapshot $snapshot_name for volume $1"
         fi
+
   done < /tmp/ec2_snapshots.txt
 }
 
