@@ -94,7 +94,7 @@ prune_snapshot() {
 
 Email() {
   command -v smtp-cli >/dev/null 2>&1      || { echo >&2 "The smtp-cli tool was not detected. Maybe you can get it here http://www.logix.cz/michal/devel/smtp-cli/smtp-cli"; exit 1; }
-  smtp-cli --to=$MAIL_TO --from=$MAIL_FROM --user=$MAIL_USER --pass=$MAIL_PASS --server=$MAIL_SRV:25 --subject="ec2backup has something for you" --body-plain="$@"
+  /usr/local/bin/smtp-cli --to=$MAIL_TO --from=$MAIL_FROM --user=$MAIL_USER --pass=$MAIL_PASS --server=$MAIL_SRV:25 --subject="ec2backup has something for you" --body-plain="$@"
 }
 
 # Get a list of volumes that are available in EC2
