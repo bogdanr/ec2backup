@@ -1,6 +1,7 @@
 #!/bin/bash
 #
 # Author:	Bogdan Radulescu <bogdan@nimblex.net>
+#set -x
 
 START=`date +%s`
 
@@ -57,8 +58,7 @@ create_tags() {
   TMPFILE="/tmp/$$.tmp"
   aws --profile=$PROFILE ec2 describe-volumes --volume-ids $1 | jq -c '.Volumes[].Tags[]' | sed -e 's/{//' -e 's/}//' -e 's/:/=/g' >> $TMPFILE
   if [ -f $TMPFILE ]; then
-      echo "Setting tags..."
-      aws ec2 create-tags --profile=$PROFILE --resources $2 --tags `cat $TMPFILE`
+      aws ec2 create-tags --profile=$PROFILE --resources $2 --tags "`cat $TMPFILE`"
       unlink $TMPFILE
   fi
 }
@@ -81,12 +81,13 @@ prune_snapshot() {
         snapshot_date=`echo "$line" | awk '{print $7}' | awk -F "T" '{printf "%s\n", $1}'`
         snapshot_date_s=`date --date="$snapshot_date" +%s`
         volume_name=`echo "$line" | awk '{print $9}'`
-        
-        create_tags $volume_name $snapshot_name
  
         if (( $snapshot_date_s <= $day_days_ago_s )); then
-                        Info "Deleting snapshot $snapshot_name for volume $1"
-                        aws --profile=$PROFILE ec2 delete-snapshot --snapshot-id $snapshot_name
+            Info "Deleting snapshot $snapshot_name for volume $1"
+            aws --profile=$PROFILE ec2 delete-snapshot --snapshot-id $snapshot_name
+        else
+            # If we don't delete them we make sure propper tags are set
+            create_tags $volume_name $snapshot_name
         fi
 
   done < /tmp/ec2_snapshots.txt
